@@ -7,7 +7,7 @@ var http = require('http');
 
 require('dotenv').config()
 const PORT = process.env.PORT
-const MONGO_CONNECTION = process.env.MONGO_CONNECTION
+const MONGO_LINK = process.env.MONGO_LINK
 
 
 //Get port from environment and store in Express.
@@ -21,7 +21,7 @@ var server = http.createServer(app);
 //DATABASE CONNECTION
 const mongoose = require('mongoose');
 
-mongoose.connect(`${MONGO_CONNECTION}`, {
+mongoose.connect(`${MONGO_LINK}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false

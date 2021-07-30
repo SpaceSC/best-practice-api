@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www",
+    "start": "nodemon ./bin/www -e env,js,json,mjs",
     "test": "jest"
   },
   "dependencies": {
@@ -15,8 +15,10 @@
     "express-async-errors": "^3.1.1",
     "http-errors": "~1.6.3",
     "http-proxy": "^1.18.1",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.13.3",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "jest": "^27.0.6",

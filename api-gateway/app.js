@@ -1,3 +1,4 @@
+require('dotenv').config() // tests might need it here too
 const createError = require('http-errors')
 
 const express = require('express')
@@ -7,6 +8,8 @@ const app = express()
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
+const fetch = require('node-fetch');
+const jwt = require('jsonwebtoken');
 
 const userboardsRouter = require('./routes/userboardRouter')
 const errorHandler = require('./middleware/errorHandler')
@@ -25,10 +28,6 @@ const proxy = httpProxy.createProxyServer();
 //   // and then proxy the request.
 //   proxy.web(req, res, { target: 'http://localhost:3001' });
 // });
-
- 
-
-
 app.use(cors())
 app.use(logger('dev'))
 app.use(express.json())
@@ -52,6 +51,37 @@ proxy.on('proxyReq', function(proxyReq, req, res, options) {
 app.all('/api/userboards*', (req, res, next) => {
  proxy.web(req, res, { target: 'http://localhost:3001' });
 })
+
+// gateway handles users and login
+
+app.get('/login', async (req, res) => {
+  const code = req.query.code;
+  console.log(code);
+
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      code,
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+      redirect_uri: process.env.REDIRECT_URI,
+      grant_type: "authorization_code"
+    }),
+  });
+
+  const data = await response.json();
+  console.log(data);
+
+  const userInfo = jwt.decode(data.id_token);
+
+  console.log(userInfo);
+
+
+  res.status(200).json({message: "You're logged in"});
+ })
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
