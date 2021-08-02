@@ -1,20 +1,20 @@
-require('dotenv').config() // tests might need it here too
-const createError = require('http-errors')
+require("dotenv").config(); // tests might need it here too
+const createError = require("http-errors");
 
-const express = require('express')
-require('express-async-errors')
-const app = express()
+const express = require("express");
+require("express-async-errors");
+const app = express();
 
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
-const logger = require('morgan')
-const fetch = require('node-fetch');
-const jwt = require('jsonwebtoken');
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const fetch = require("node-fetch");
+const jwt = require("jsonwebtoken");
 
-const userboardsRouter = require('./routes/userboardRouter')
-const errorHandler = require('./middleware/errorHandler')
+const userboardsRouter = require("./routes/userboardRouter");
+const errorHandler = require("./middleware/errorHandler");
 //const http = require('http');
-const httpProxy = require('http-proxy');
+const httpProxy = require("http-proxy");
 
 // Create a proxy server with custom application logic
 //
@@ -28,11 +28,11 @@ const proxy = httpProxy.createProxyServer();
 //   // and then proxy the request.
 //   proxy.web(req, res, { target: 'http://localhost:3001' });
 // });
-app.use(cors())
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
+app.use(cors());
+app.use(logger("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // To modify the proxy connection before data is sent, you can listen
 // for the 'proxyReq' event. When the event is fired, you will receive
@@ -42,19 +42,28 @@ app.use(cookieParser())
 // you need to modify the proxy request before the proxy connection
 // is made to the target.
 //
-proxy.on('proxyReq', function(proxyReq, req, res, options) {
-  proxyReq.setHeader("X-USER-ID", "2");
+proxy.on("proxyReq", function (proxyReq, req, res, options) {
+  //proxyReq.setHeader("X-USER-ID", "2");
+
+  jwt.verify(req.headers.authorization, process.env.JWT_SECRET, function (err, decoded) {
+    if (err) {
+      console.log(err);
+      proxyReq.removeHeader("X-USER-ID");
+    } else {
+      proxyReq.setHeader("X-USER-ID", decoded.user_id);
+    }
+  });
 });
 
 //app.use('/api/todo/*', (req, res, next) => res.json({ message: 'Handle all requests'}) )
 
-app.all('/api/userboards*', (req, res, next) => {
- proxy.web(req, res, { target: 'http://localhost:3001' });
-})
+app.all("/api/userboards*", (req, res, next) => {
+  proxy.web(req, res, { target: "http://localhost:3001" });
+});
 
 // gateway handles users and login
 
-app.get('/login', async (req, res) => {
+app.get("/login", async (req, res) => {
   const code = req.query.code;
   console.log(code);
 
@@ -68,7 +77,7 @@ app.get('/login', async (req, res) => {
       client_id: process.env.CLIENT_ID,
       client_secret: process.env.CLIENT_SECRET,
       redirect_uri: process.env.REDIRECT_URI,
-      grant_type: "authorization_code"
+      grant_type: "authorization_code",
     }),
   });
 
@@ -79,19 +88,25 @@ app.get('/login', async (req, res) => {
 
   console.log(userInfo);
 
+  const token = jwt.sign(
+    { user_id: userInfo.sub, user_email: userInfo.email, user_pic: userInfo.picture, given_name: userInfo.given_name },
+    process.env.JWT_SECRET
+  );
 
-  res.status(200).json({message: "You're logged in"});
- })
+  //res.status(200).json({message: "You're logged in"});
+  res.status(200).json({ token });
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404))
-})
+  next(createError(404));
+});
 
-app.use(errorHandler)
+app.use(errorHandler);
 
 // console.log("listening on port 3000")
 // server.listen(3000);
 
+module.exports = app;
 
-module.exports = app
+// https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=509125524563-6rc0a4856oteran745fe2s7c9hc1cn73.apps.googleusercontent.com&scope=openid%20email%20profile&redirect_uri=http%3A//localhost:3000/login&prompt=select_account
