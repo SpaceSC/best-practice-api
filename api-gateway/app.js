@@ -13,6 +13,7 @@ const jwt = require("jsonwebtoken");
 
 const userboardsRouter = require("./routes/userboardRouter");
 const errorHandler = require("./middleware/errorHandler");
+const requestUserHandler = require("./middleware/requestUserHandler");
 //const http = require('http');
 const httpProxy = require("http-proxy");
 
@@ -61,6 +62,8 @@ app.all("/api/userboards*", (req, res, next) => {
   proxy.web(req, res, { target: "http://localhost:3001" });
 });
 
+app.use(requestUserHandler);
+
 // gateway handles users and login
 
 app.get("/login", async (req, res) => {
@@ -86,7 +89,7 @@ app.get("/login", async (req, res) => {
 
   const userInfo = jwt.decode(data.id_token);
 
-  console.log(userInfo);
+  //console.log(userInfo);
 
   const token = jwt.sign(
     { user_id: userInfo.sub, user_email: userInfo.email, user_pic: userInfo.picture, given_name: userInfo.given_name },
@@ -95,6 +98,18 @@ app.get("/login", async (req, res) => {
 
   //res.status(200).json({message: "You're logged in"});
   res.status(200).json({ token });
+});
+
+app.get("/api/private", async (req, res) => {
+  console.log(req.headers);
+
+  if (res.locals.user) {
+    //console.log(verified);
+    return res.json({ message: "PSSSSSST SUCH SECRET, MUCH WOW" });
+  } else {
+    //console.log(err);
+    return res.status(401).json({ message: "unauthorized" });
+  }
 });
 
 // catch 404 and forward to error handler

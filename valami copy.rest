@@ -1,0 +1,30 @@
+GET http://localhost:3000/api/userboards
+###
+GET http://localhost:3001/api/userboards
+
+###
+//PUT http://localhost:5000/api/appointment
+# POST http://localhost:5000/api/appointment
+# Content-Type: application/json
+
+# { "startDate": "2023-10-02",
+#     "startTime": "18:05",
+#     "endDate": "2023-10-02",
+#     "endTime": "18:07",
+#     "comment": "tesztcomment2"}
+
+###
+
+# ###
+# DELETE http://localhost:5000/api/appointment/60f0b8b15aa36601cc23fe51
+
+# ###
+# PATCH http://localhost:5000/api/appointment/60f0b9595aa36601cc23fe60
+# Content-Type: application/json
+
+# { 
+#     "startDate": "2023-10-31",
+#     "startTime": "18:06",
+#     "endDate": "2023-10-31",
+#     "endTime": "18:10",
+#     "comment": "updated"}
