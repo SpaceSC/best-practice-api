@@ -1,4 +1,4 @@
-require("dotenv").config(); // tests might need it here too
+//require("dotenv").config(); // already in www file (.env.est not necessary, this can be used for testing)
 const createError = require("http-errors");
 
 const express = require("express");
@@ -48,7 +48,7 @@ proxy.on("proxyReq", function (proxyReq, req, res, options) {
 
   jwt.verify(req.headers.authorization, process.env.JWT_SECRET, function (err, decoded) {
     if (err) {
-      console.log(err);
+      //console.log(err);
       proxyReq.removeHeader("X-USER-ID");
     } else {
       proxyReq.setHeader("X-USER-ID", decoded.user_id);
@@ -101,7 +101,7 @@ app.get("/login", async (req, res) => {
 });
 
 app.get("/api/private", async (req, res) => {
-  console.log(req.headers);
+  //console.log(req.headers);
 
   if (res.locals.user) {
     //console.log(verified);
