@@ -28,7 +28,7 @@ describe("GET - api/private tests", () => {
     const token = jwt.sign( {user_id: 1}, process.env.JWT_SECRET);
 
     //when
-    console.log("EZAAAAAAAZ",process.env.JWT_SECRET);
+    //console.log("EZAAAAAAAZ",process.env.JWT_SECRET);
     const res = await request.get("/api/private").set("Authorization", token);
 
     //then
